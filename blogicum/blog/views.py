@@ -89,7 +89,7 @@ class PostUpdateView(LoginRequiredMixin, UpdateView):
 
     def dispatch(self, request, args, **kwargs):
         if not request.user.is_authenticated:
-            return self.login_url
+            return redirect(self.login_url)
         post = self.get_object()
         if post.author != request.user:
             return redirect(
@@ -101,6 +101,7 @@ class PostUpdateView(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy('blog:post_detail',
                             kwargs={'post_id': self.kwargs.get('post_id')})
+
 
 class PostDeleteView(DeleteView):
     model = Post
@@ -188,7 +189,8 @@ class ProfileListView(ListView, LoginRequiredMixin):
                 pub_date__lt=timezone.now(),
                 category__is_published=True,
             ).order_by('-pub_date').filter(author=self.author
-                                           ).annotate(comment_count=Count('comment'))
+                                           ).annotate(
+                                               comment_count=Count('comment'))
 
         return Post.objects.select_related(
             'category',
