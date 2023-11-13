@@ -7,10 +7,10 @@ class PostForm(forms.ModelForm):
 
     class Meta:
         model = Post
-        fields = '__all__'
+        exclude = ('author',)
         widgets = {
             'text': forms.Textarea({'cols': '22', 'rows': '5'}),
-            'pub_date': forms.DateInput(attrs={'type': 'date'})
+            'pub_date': forms.DateInput(attrs={'type': 'datetime-local'})
         }
 
 
