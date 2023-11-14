@@ -85,22 +85,20 @@ class PostUpdateView(LoginRequiredMixin, UpdateView):
     form_class = PostForm
     pk_url_kwarg = 'post_id'
     template_name = 'blog/create.html'
-    login_url = '/auth/login/'
 
-    def dispatch(self, request, args, **kwargs):
-        if not request.user.is_authenticated:
-            return redirect(self.login_url)
-        post = self.get_object()
-        if post.author != request.user:
-            return redirect(
-                'blog:post_detail',
-                post_id=self.kwargs['post_id']
-            )
-        return super().dispatch(request, args, **kwargs)
+    def dispatch(self, request, *args, **kwargs):
+        post = get_object_or_404(
+            Post,
+            pk=self.kwargs['post_id']
+        )
+        if post.author == request.user:
+            return super().dispatch(request, *args, **kwargs)
+        return redirect(reverse('blog:post_detail',
+                                kwargs={'post_id': self.kwargs['post_id']}))
 
     def get_success_url(self):
         return reverse_lazy('blog:post_detail',
-                            kwargs={'post_id': self.kwargs.get('post_id')})
+                            kwargs={'post_id': self.kwargs['post_id']})
 
 
 class PostDeleteView(DeleteView):
@@ -169,7 +167,7 @@ class CommentUpdateView(LoginRequiredMixin, UpdateView):
 
 class ProfileListView(ListView, LoginRequiredMixin):
     template_name = 'blog/profile.html'
-    paginate_by = NAMBER_OF_POSTS_ON_INDEX
+    paginate_by = 10
     slug_field = 'username'
     slug_url_kwarg = 'username'
 
