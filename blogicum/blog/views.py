@@ -19,7 +19,7 @@ from blog.constants import NAMBER_OF_POSTS_ON_INDEX
 class PostsListView(LoginRequiredMixin, ListView):
     model = Post
     template_name = 'blog/index.html'
-    paginate_by = NAMBER_OF_POSTS_ON_INDEX
+    paginate_by = 5
 
     def get_queryset(self):
         return Post.objects.prefetch_related(
@@ -165,11 +165,11 @@ class CommentUpdateView(LoginRequiredMixin, UpdateView):
                             kwargs={'post_id': self.kwargs.get('post_id')})
 
 
-class ProfileListView(ListView, LoginRequiredMixin):
+class ProfileDetailView(DetailView, LoginRequiredMixin):
+    model = User
     template_name = 'blog/profile.html'
     paginate_by = 10
     slug_field = 'username'
-    slug_url_kwarg = 'username'
 
     def get_queryset(self):
         self.author = get_object_or_404(
@@ -242,7 +242,7 @@ class ProfilePasswordUpdateView(LoginRequiredMixin, UpdateView):
 class CategoryListView(ListView, LoginRequiredMixin):
     model = Post
     template_name = 'blog/category.html'
-    paginate_by = NAMBER_OF_POSTS_ON_INDEX
+    paginate_by = 5
     pk_field = 'slugname'
     pk_url_kwarg = 'slugname'
     category = None
