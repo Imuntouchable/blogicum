@@ -165,11 +165,10 @@ class CommentUpdateView(LoginRequiredMixin, UpdateView):
                             kwargs={'post_id': self.kwargs.get('post_id')})
 
 
-class ProfileDetailView(DetailView, LoginRequiredMixin):
+class ProfileDetailView(ListView, LoginRequiredMixin):
     model = User
     template_name = 'blog/profile.html'
     paginate_by = 10
-    slug_field = 'username'
 
     def get_queryset(self):
         self.author = get_object_or_404(
