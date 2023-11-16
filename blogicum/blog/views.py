@@ -16,10 +16,10 @@ from blog.models import Post, Category, User, Comment
 from blog.constants import NAMBER_OF_POSTS_ON_INDEX
 
 
-class PostsListView(LoginRequiredMixin, ListView):
+class PostsListView(ListView):
     model = Post
     template_name = 'blog/index.html'
-    paginate_by = 5
+    paginate_by = 10
 
     def get_queryset(self):
         return Post.objects.prefetch_related(
@@ -50,7 +50,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         )
 
 
-class PostDetailView(LoginRequiredMixin, DetailView):
+class PostDetailView(DetailView):
     model = Post
     pk_field = 'post_id'
     pk_url_kwarg = 'post_id'
@@ -101,11 +101,24 @@ class PostUpdateView(LoginRequiredMixin, UpdateView):
                             kwargs={'post_id': self.kwargs['post_id']})
 
 
-class PostDeleteView(DeleteView):
+class PostDeleteView(LoginRequiredMixin, DeleteView):
     model = Post
-    template_name = 'blog/create.html'
     success_url = reverse_lazy('blog:index')
-    pk_url_kwarg = 'post_id'
+    template_name = 'blog/create.html'
+
+    def get_object(self, **kwargs):
+        return get_object_or_404(
+            Post,
+            pk=self.kwargs.get('post_id'),
+        )
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.get_object().author != self.request.user:
+            return redirect(
+                'blog:post_detail',
+                self.kwargs.get('post_id')
+            )
+        return super().dispatch(request, *args, **kwargs)
 
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
@@ -238,10 +251,10 @@ class ProfilePasswordUpdateView(LoginRequiredMixin, UpdateView):
         return reverse_lazy('blog:index')
 
 
-class CategoryListView(ListView, LoginRequiredMixin):
+class CategoryListView(ListView):
     model = Post
     template_name = 'blog/category.html'
-    paginate_by = 5
+    paginate_by = 10
     pk_field = 'slugname'
     pk_url_kwarg = 'slugname'
     category = None

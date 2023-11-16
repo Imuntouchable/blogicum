@@ -5,6 +5,7 @@ from django.views.generic import CreateView
 from django.conf import settings
 from django.conf.urls.static import static
 
+app_name = 'blogicum'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
