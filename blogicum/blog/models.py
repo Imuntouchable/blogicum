@@ -1,12 +1,12 @@
-from django.db import models
 from django.contrib.auth import get_user_model
+from django.db import models
 
 from blog.constants import LENGTH_OF_TEXT
 
 User = get_user_model()
 
 
-class Abstract(models.Model):
+class PublishedCreated(models.Model):
     is_published = models.BooleanField(
         default=True,
         verbose_name='Опубликовано',
@@ -21,7 +21,7 @@ class Abstract(models.Model):
         abstract = True
 
 
-class Category(Abstract):
+class Category(PublishedCreated):
     title = models.CharField(
         max_length=LENGTH_OF_TEXT,
         verbose_name='Заголовок'
@@ -30,8 +30,10 @@ class Category(Abstract):
     slug = models.SlugField(
         unique=True,
         verbose_name='Идентификатор',
-        help_text='Идентификатор страницы для URL; разрешены '
-        'символы латиницы, цифры, дефис и подчёркивание.'
+        help_text=(
+            'Идентификатор страницы для URL; '
+            'разрешены символы латиницы, цифры, дефис и подчёркивание.'
+        )
     )
 
     class Meta:
@@ -39,10 +41,10 @@ class Category(Abstract):
         verbose_name_plural = 'Категории'
 
     def __str__(self):
-        return self.slug
+        return self.slug[:30]
 
 
-class Location(Abstract):
+class Location(PublishedCreated):
     name = models.CharField(
         max_length=LENGTH_OF_TEXT,
         verbose_name='Название места'
@@ -53,10 +55,10 @@ class Location(Abstract):
         verbose_name_plural = 'Местоположения'
 
     def __str__(self):
-        return self.name
+        return self.name[30:]
 
 
-class Post(Abstract):
+class Post(PublishedCreated):
     title = models.CharField(
         max_length=LENGTH_OF_TEXT,
         verbose_name='Заголовок'
@@ -64,19 +66,22 @@ class Post(Abstract):
     text = models.TextField(verbose_name='Текст')
     pub_date = models.DateTimeField(
         verbose_name='Дата и время публикации',
-        help_text='Если установить дату и время в будущем — можно делать '
-        'отложенные публикации.'
+        help_text=(
+            'Если установить дату и время в будущем — можно делать '
+            'отложенные публикации.'
+        )
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
+        related_name='posts',
         verbose_name='Автор публикации'
     )
     location = models.ForeignKey(
         Location,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='post',
+        related_name='posts',
         verbose_name='Местоположение',
         blank=True
     )
@@ -84,7 +89,7 @@ class Post(Abstract):
         Category,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='post',
+        related_name='posts',
         verbose_name='Категория'
     )
     image = models.ImageField('Фото', upload_to='post_images', blank=True)
@@ -95,7 +100,7 @@ class Post(Abstract):
         ordering = ['-pub_date']
 
     def __str__(self):
-        return self.title
+        return self.title[:30]
 
 
 class Comment(models.Model):
@@ -103,7 +108,7 @@ class Comment(models.Model):
     post = models.ForeignKey(
         Post,
         on_delete=models.CASCADE,
-        related_name='comment',
+        related_name='comments',
     )
     created_at = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -112,4 +117,4 @@ class Comment(models.Model):
         ordering = ('created_at',)
 
     def __str__(self):
-        return self.text
+        return f'{self.post}, {self.author}, {self.text}'
