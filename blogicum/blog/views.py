@@ -1,18 +1,15 @@
-from blog.constants import NAMBER_OF_POSTS_ON_INDEX
-from blog.forms import CommentForm, PostForm, UserForm
-from blog.mixins import PostMixin
-from blog.models import Category, Comment, Post, User
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from django.views.generic import (CreateView,
-                                  DeleteView,
-                                  DetailView,
-                                  ListView,
-                                  UpdateView
-                                  )
+from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
+                                  UpdateView)
+
+from blog.forms import CommentForm, PostForm, UserForm
+from blog.mixins import PostMixin
+from blog.models import Category, Comment, Post, User
+from blog.constants import NAMBER_OF_POSTS_ON_INDEX
 
 
 class PostsListView(ListView):
