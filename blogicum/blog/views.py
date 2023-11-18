@@ -1,15 +1,18 @@
+from blog.constants import NAMBER_OF_POSTS_ON_INDEX
+from blog.forms import CommentForm, PostForm, UserForm
+from blog.mixins import PostMixin
+from blog.models import Category, Comment, Post, User
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
-                                  UpdateView)
-
-from blog.constants import NAMBER_OF_POSTS_ON_INDEX
-from blog.forms import CommentForm, PostForm, UserForm
-from blog.mixins import PostMixin
-from blog.models import Category, Comment, Post, User
+from django.views.generic import (CreateView,
+                                  DeleteView,
+                                  DetailView,
+                                  ListView,
+                                  UpdateView
+                                  )
 
 
 class PostsListView(ListView):
@@ -58,14 +61,13 @@ class PostDetailView(DetailView):
             Post,
             pk=self.kwargs['post_id']
         )
-        if post_obj.author != self.request.user and (
-            post_obj.pub_date > timezone.now()
-        ):
+        if post_obj.author != self.request.user:
             post_obj = get_object_or_404(
                 Post,
                 pk=self.kwargs['post_id'],
                 is_published=True,
-                category__is_published=True
+                category__is_published=True,
+                pub_date__lt=timezone.now(),
             )
         return post_obj
 
@@ -78,18 +80,43 @@ class PostDetailView(DetailView):
         return context
 
 
-class PostUpdateView(LoginRequiredMixin, PostMixin, UpdateView):
+class PostUpdateView(PostMixin, UpdateView):
     form_class = PostForm
 
-    def get_success_url(self):
-        return reverse(
-            'blog:post_detail',
-            kwargs={'post_id': self.kwargs['post_id']}
+    def dispatch(self, request, *args, **kwargs):
+        post = get_object_or_404(
+            Post,
+            pk=self.kwargs.get('post_id'),
+        )
+        if post.author == request.user:
+            return super().dispatch(request, *args, **kwargs)
+        return redirect(
+            reverse(
+                'blog:post_detail',
+                kwargs={'post_id': self.kwargs['post_id']}
+            )
         )
 
+    def get_success_url(self):
+        return reverse_lazy('blog:post_detail',
+                            kwargs={'post_id': self.kwargs['post_id']}
+                            )
 
-class PostDeleteView(LoginRequiredMixin, PostMixin, DeleteView):
+
+class PostDeleteView(PostMixin, DeleteView):
     success_url = reverse_lazy('blog:index')
+
+    def dispatch(self, request, *args, **kwargs):
+        post = get_object_or_404(
+            Post,
+            pk=self.kwargs.get('post_id'),
+        )
+        if post.author != self.request.user:
+            return redirect(
+                'blog:post_detail',
+                self.kwargs.get('post_id')
+            )
+        return super().dispatch(request, *args, **kwargs)
 
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
