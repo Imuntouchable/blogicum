@@ -4,8 +4,8 @@ from .models import Category, Comment, Location, Post
 
 
 @admin.register(Category, Location, Post)
-class AuthorAdmin(admin.ModelAdmin):
-    search_fields = ['slug']
+class PostAdmin(admin.ModelAdmin):
+    search_fields = ['title']
     list_filter = ['is_published']
 
 

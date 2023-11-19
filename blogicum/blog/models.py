@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 
 from blog.constants import LENGTH_OF_TEXT
+from blog.constants import NUMBER_OF_SYMBOLS_IN_MAIN
 
 User = get_user_model()
 
@@ -41,7 +42,7 @@ class Category(PublishedCreated):
         verbose_name_plural = 'Категории'
 
     def __str__(self):
-        return self.slug[:30]
+        return self.slug[:NUMBER_OF_SYMBOLS_IN_MAIN]
 
 
 class Location(PublishedCreated):
@@ -55,7 +56,7 @@ class Location(PublishedCreated):
         verbose_name_plural = 'Местоположения'
 
     def __str__(self):
-        return self.name[30:]
+        return self.name[NUMBER_OF_SYMBOLS_IN_MAIN:]
 
 
 class Post(PublishedCreated):
@@ -100,7 +101,7 @@ class Post(PublishedCreated):
         ordering = ['-pub_date']
 
     def __str__(self):
-        return self.title[:30]
+        return self.title[:NUMBER_OF_SYMBOLS_IN_MAIN]
 
 
 class Comment(models.Model):
@@ -117,4 +118,7 @@ class Comment(models.Model):
         ordering = ('created_at',)
 
     def __str__(self):
-        return f'{self.post}, {self.author}, {self.text}'
+        return (
+            f'{self.post}, {self.author}, '
+            f'{self.text[:NUMBER_OF_SYMBOLS_IN_MAIN]}'
+        )
