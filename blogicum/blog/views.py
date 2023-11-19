@@ -79,13 +79,14 @@ class PostUpdateView(LoginRequiredMixin, PostMixin, UpdateView):
     form_class = PostForm
 
     def get_success_url(self):
-        return reverse_lazy('blog:post_detail',
-                            kwargs={'post_id': self.kwargs['post_id']}
-                            )
+        return reverse(
+            'blog:post_detail',
+            kwargs={'post_id': self.kwargs['post_id']}
+        )
 
 
 class PostDeleteView(LoginRequiredMixin, PostMixin, DeleteView):
-    success_url = reverse('blog:index')
+    success_url = reverse_lazy('blog:index')
 
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
