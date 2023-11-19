@@ -1,8 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
-from blog.constants import LENGTH_OF_TEXT
-from blog.constants import NUMBER_OF_SYMBOLS_IN_MAIN
+from blog.constants import LENGTH_OF_TEXT, NUMBER_OF_SYMBOLS_IN_MAIN
 
 User = get_user_model()
 
@@ -56,7 +55,7 @@ class Location(PublishedCreated):
         verbose_name_plural = 'Местоположения'
 
     def __str__(self):
-        return self.name[NUMBER_OF_SYMBOLS_IN_MAIN:]
+        return self.name[:NUMBER_OF_SYMBOLS_IN_MAIN]
 
 
 class Post(PublishedCreated):
